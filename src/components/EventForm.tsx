@@ -4,25 +4,26 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { X, Plus, Trash2 } from 'lucide-react';
+import { currencies, getCurrencySymbol } from '@/utils/currencies';
 
 interface EventFormProps {
   onAddEvent: (event: {
     title: string;
     type: 'Trip' | 'Event';
     totalPlanned: number;
-    totalActual: number;
+    currency: string;
+    status: 'Planning' | 'Completed';
     items: Array<{
       name: string;
       category: string;
       planned: number;
-      actual: number;
       notes: string;
     }>;
   }) => void;
   onClose: () => void;
+  defaultCurrency: string;
 }
 
 const eventCategories = [
@@ -36,19 +37,21 @@ const eventCategories = [
   'Other'
 ];
 
-const EventForm = ({ onAddEvent, onClose }: EventFormProps) => {
+const EventForm = ({ onAddEvent, onClose, defaultCurrency }: EventFormProps) => {
   const [formData, setFormData] = useState({
     title: '',
     type: 'Event' as 'Trip' | 'Event',
+    currency: defaultCurrency,
+    status: 'Planning' as 'Planning' | 'Completed',
     items: [
-      { name: '', category: '', planned: 0, actual: 0, notes: '' }
+      { name: '', category: '', planned: 0, notes: '' }
     ]
   });
 
   const addItem = () => {
     setFormData(prev => ({
       ...prev,
-      items: [...prev.items, { name: '', category: '', planned: 0, actual: 0, notes: '' }]
+      items: [...prev.items, { name: '', category: '', planned: 0, notes: '' }]
     }));
   };
 
@@ -74,16 +77,18 @@ const EventForm = ({ onAddEvent, onClose }: EventFormProps) => {
     if (!formData.title) return;
 
     const totalPlanned = formData.items.reduce((sum, item) => sum + item.planned, 0);
-    const totalActual = formData.items.reduce((sum, item) => sum + item.actual, 0);
 
     onAddEvent({
       title: formData.title,
       type: formData.type,
+      currency: formData.currency,
+      status: formData.status,
       totalPlanned,
-      totalActual,
       items: formData.items.filter(item => item.name && item.category)
     });
   };
+
+  const currencySymbol = getCurrencySymbol(formData.currency);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -101,12 +106,12 @@ const EventForm = ({ onAddEvent, onClose }: EventFormProps) => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="title">Event/Trip Title</Label>
                 <Input
                   id="title"
-                  placeholder="e.g., Summer Vacation, Wedding, Conference"
+                  placeholder="e.g., Summer Vacation, Wedding"
                   value={formData.title}
                   onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                   required
@@ -129,6 +134,42 @@ const EventForm = ({ onAddEvent, onClose }: EventFormProps) => {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="currency">Currency</Label>
+                <Select 
+                  value={formData.currency} 
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, currency: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {currencies.map(currency => (
+                      <SelectItem key={currency.code} value={currency.code}>
+                        {currency.code} ({currency.symbol}) - {currency.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="status">Status</Label>
+              <Select 
+                value={formData.status} 
+                onValueChange={(value: 'Planning' | 'Completed') => 
+                  setFormData(prev => ({ ...prev, status: value }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Planning">Planning</SelectItem>
+                  <SelectItem value="Completed">Completed</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
@@ -143,7 +184,7 @@ const EventForm = ({ onAddEvent, onClose }: EventFormProps) => {
               <div className="space-y-4">
                 {formData.items.map((item, index) => (
                   <Card key={index} className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                       <div>
                         <Label className="text-xs">Item Name</Label>
                         <Input
@@ -171,21 +212,12 @@ const EventForm = ({ onAddEvent, onClose }: EventFormProps) => {
                         </Select>
                       </div>
                       <div>
-                        <Label className="text-xs">Planned ($)</Label>
+                        <Label className="text-xs">Planned ({currencySymbol})</Label>
                         <Input
                           type="number"
                           step="0.01"
                           value={item.planned || ''}
                           onChange={(e) => updateItem(index, 'planned', parseFloat(e.target.value) || 0)}
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Actual ($)</Label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={item.actual || ''}
-                          onChange={(e) => updateItem(index, 'actual', parseFloat(e.target.value) || 0)}
                         />
                       </div>
                       <div className="flex items-end">
@@ -199,6 +231,14 @@ const EventForm = ({ onAddEvent, onClose }: EventFormProps) => {
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
+                    </div>
+                    <div className="mt-3">
+                      <Label className="text-xs">Notes (optional)</Label>
+                      <Input
+                        placeholder="Add any notes or reminders"
+                        value={item.notes}
+                        onChange={(e) => updateItem(index, 'notes', e.target.value)}
+                      />
                     </div>
                   </Card>
                 ))}
