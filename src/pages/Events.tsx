@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RainbowButton } from '@/components/ui/rainbow-button';
 import EventForm from '@/components/EventForm';
 import { Calendar, MapPin, DollarSign, Download, Trash2 } from 'lucide-react';
 import { currencies, getCurrencySymbol } from '@/utils/currencies';
@@ -341,13 +342,12 @@ const Events = () => {
           {planningEvents.length === 0 ? <Card className="bg-slate-800/50 border-purple-500/20">
               <CardContent className="p-12 text-center">
                 <Calendar className="h-16 w-16 text-purple-400 mx-auto mb-4" />
-                <h4 className="text-xl font-semibold text-white mb-2">No Events Yet</h4>
-                <p className="text-gray-300 mb-6">
+                <h4 className="text-xl font-semibold text-white mb-2">No Events Yet</h4>                <p className="text-gray-300 mb-6">
                   Create your first event or trip budget to get started with planning!
                 </p>
-                <Button onClick={() => setShowEventForm(true)} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                <RainbowButton onClick={() => setShowEventForm(true)}>
                   Create Your First Budget
-                </Button>
+                </RainbowButton>
               </CardContent>
             </Card> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {planningEvents.map(event => <EventCard key={event.id} event={event} onDownload={handleDownload} onDelete={deleteEvent} />)}
