@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -89,17 +88,18 @@ const EventForm = ({ onAddEvent, onClose, defaultCurrency }: EventFormProps) => 
   };
 
   const currencySymbol = getCurrencySymbol(formData.currency);
+  const columnTitle = formData.status === 'Completed' ? 'Expense' : 'Planned';
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-slate-800 border-purple-500/30">
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle>Create New Event/Trip Budget</CardTitle>
-              <CardDescription>Plan your budget for upcoming events or trips</CardDescription>
+              <CardTitle className="text-white">New Budget</CardTitle>
+              <CardDescription className="text-gray-300">Plan your budget for upcoming events or trips</CardDescription>
             </div>
-            <Button variant="ghost" size="icon" onClick={onClose}>
+            <Button variant="ghost" size="icon" onClick={onClose} className="text-gray-400 hover:text-white hover:bg-purple-600/20">
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -108,44 +108,45 @@ const EventForm = ({ onAddEvent, onClose, defaultCurrency }: EventFormProps) => 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="title">Event/Trip Title</Label>
+                <Label htmlFor="title" className="text-gray-300">Title</Label>
                 <Input
                   id="title"
                   placeholder="e.g., Summer Vacation, Wedding"
                   value={formData.title}
                   onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                   required
+                  className="bg-slate-700/50 border-purple-500/30 text-white placeholder:text-gray-400"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="type">Type</Label>
+                <Label htmlFor="type" className="text-gray-300">Type</Label>
                 <Select 
                   value={formData.type} 
                   onValueChange={(value: 'Trip' | 'Event') => 
                     setFormData(prev => ({ ...prev, type: value }))
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-slate-700/50 border-purple-500/30 text-white">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Trip">Trip</SelectItem>
-                    <SelectItem value="Event">Event</SelectItem>
+                  <SelectContent className="bg-slate-800 border-purple-500/30">
+                    <SelectItem value="Trip" className="text-white hover:bg-purple-600/20">Trip</SelectItem>
+                    <SelectItem value="Event" className="text-white hover:bg-purple-600/20">Event</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="currency">Currency</Label>
+                <Label htmlFor="currency" className="text-gray-300">Currency</Label>
                 <Select 
                   value={formData.currency} 
                   onValueChange={(value) => setFormData(prev => ({ ...prev, currency: value }))}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-slate-700/50 border-purple-500/30 text-white">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-slate-800 border-purple-500/30 max-h-60">
                     {currencies.map(currency => (
-                      <SelectItem key={currency.code} value={currency.code}>
+                      <SelectItem key={currency.code} value={currency.code} className="text-white hover:bg-purple-600/20">
                         {currency.code} ({currency.symbol}) - {currency.name}
                       </SelectItem>
                     ))}
@@ -155,27 +156,27 @@ const EventForm = ({ onAddEvent, onClose, defaultCurrency }: EventFormProps) => 
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
+              <Label htmlFor="status" className="text-gray-300">Status</Label>
               <Select 
                 value={formData.status} 
                 onValueChange={(value: 'Planning' | 'Completed') => 
                   setFormData(prev => ({ ...prev, status: value }))
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="bg-slate-700/50 border-purple-500/30 text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Planning">Planning</SelectItem>
-                  <SelectItem value="Completed">Completed</SelectItem>
+                <SelectContent className="bg-slate-800 border-purple-500/30">
+                  <SelectItem value="Planning" className="text-white hover:bg-purple-600/20">Planning</SelectItem>
+                  <SelectItem value="Completed" className="text-white hover:bg-purple-600/20">Completed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div>
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Budget Items</h3>
-                <Button type="button" onClick={addItem} size="sm">
+                <h3 className="text-lg font-semibold text-white">Budget Items</h3>
+                <Button type="button" onClick={addItem} size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
                   <Plus className="h-4 w-4 mr-2" />
                   Add Item
                 </Button>
@@ -183,28 +184,29 @@ const EventForm = ({ onAddEvent, onClose, defaultCurrency }: EventFormProps) => 
 
               <div className="space-y-4">
                 {formData.items.map((item, index) => (
-                  <Card key={index} className="p-4">
+                  <Card key={index} className="p-4 bg-slate-700/30 border-purple-500/20">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                       <div>
-                        <Label className="text-xs">Item Name</Label>
+                        <Label className="text-xs text-gray-300">Item Name</Label>
                         <Input
                           placeholder="e.g., Flight tickets"
                           value={item.name}
                           onChange={(e) => updateItem(index, 'name', e.target.value)}
+                          className="bg-slate-600/50 border-purple-500/30 text-white placeholder:text-gray-400"
                         />
                       </div>
                       <div>
-                        <Label className="text-xs">Category</Label>
+                        <Label className="text-xs text-gray-300">Category</Label>
                         <Select 
                           value={item.category} 
                           onValueChange={(value) => updateItem(index, 'category', value)}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="bg-slate-600/50 border-purple-500/30 text-white">
                             <SelectValue placeholder="Select" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="bg-slate-800 border-purple-500/30">
                             {eventCategories.map(category => (
-                              <SelectItem key={category} value={category}>
+                              <SelectItem key={category} value={category} className="text-white hover:bg-purple-600/20">
                                 {category}
                               </SelectItem>
                             ))}
@@ -212,12 +214,13 @@ const EventForm = ({ onAddEvent, onClose, defaultCurrency }: EventFormProps) => 
                         </Select>
                       </div>
                       <div>
-                        <Label className="text-xs">Planned ({currencySymbol})</Label>
+                        <Label className="text-xs text-gray-300">{columnTitle} ({currencySymbol})</Label>
                         <Input
                           type="number"
                           step="0.01"
                           value={item.planned || ''}
                           onChange={(e) => updateItem(index, 'planned', parseFloat(e.target.value) || 0)}
+                          className="bg-slate-600/50 border-purple-500/30 text-white placeholder:text-gray-400"
                         />
                       </div>
                       <div className="flex items-end">
@@ -227,17 +230,19 @@ const EventForm = ({ onAddEvent, onClose, defaultCurrency }: EventFormProps) => 
                           size="icon"
                           onClick={() => removeItem(index)}
                           disabled={formData.items.length === 1}
+                          className="text-red-400 hover:text-red-300 hover:bg-red-600/20"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
                     <div className="mt-3">
-                      <Label className="text-xs">Notes (optional)</Label>
+                      <Label className="text-xs text-gray-300">Notes (optional)</Label>
                       <Input
                         placeholder="Add any notes or reminders"
                         value={item.notes}
                         onChange={(e) => updateItem(index, 'notes', e.target.value)}
+                        className="bg-slate-600/50 border-purple-500/30 text-white placeholder:text-gray-400"
                       />
                     </div>
                   </Card>
@@ -246,10 +251,10 @@ const EventForm = ({ onAddEvent, onClose, defaultCurrency }: EventFormProps) => 
             </div>
 
             <div className="flex space-x-2 pt-4">
-              <Button type="submit" className="flex-1">
-                Create Event Budget
+              <Button type="submit" className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                Create Budget
               </Button>
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button type="button" variant="outline" onClick={onClose} className="border-purple-500/30 text-purple-300 hover:bg-purple-600/20">
                 Cancel
               </Button>
             </div>
