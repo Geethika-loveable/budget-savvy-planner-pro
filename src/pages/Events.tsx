@@ -327,7 +327,7 @@ const Events = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h2 className="text-3xl font-bold text-white mb-2">Your Events & Trips</h2>
+            <h2 className="text-3xl mb-2 font-extrabold text-rose-500">Your Events & Trips</h2>
             <p className="text-gray-300">Plan and track budgets for your upcoming and past events</p>
           </div>
           <Button onClick={() => setShowEventForm(true)} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
@@ -337,7 +337,7 @@ const Events = () => {
 
         {/* Planning Events */}
         <div className="mb-8">
-          <h3 className="text-xl font-semibold text-white mb-4">Planning Events</h3>
+          <h3 className="text-xl text-white mb-4 font-bold">Planning Events</h3>
           {planningEvents.length === 0 ? <Card className="bg-slate-800/50 border-purple-500/20">
               <CardContent className="p-12 text-center">
                 <Calendar className="h-16 w-16 text-purple-400 mx-auto mb-4" />
