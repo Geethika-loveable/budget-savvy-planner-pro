@@ -9,7 +9,6 @@ import { Calendar, MapPin, DollarSign, Download, Trash2, User } from 'lucide-rea
 import { currencies, getCurrencySymbol } from '@/utils/currencies';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
-
 interface Event {
   id: string;
   title: string;
@@ -26,14 +25,15 @@ interface Event {
     notes: string;
   }>;
 }
-
 const Events = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [showEventForm, setShowEventForm] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState('USD');
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [pendingDownloadEvent, setPendingDownloadEvent] = useState<Event | null>(null);
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
 
   // Load events from localStorage on component mount
   useEffect(() => {
@@ -47,7 +47,6 @@ const Events = () => {
   useEffect(() => {
     localStorage.setItem('events', JSON.stringify(events));
   }, [events]);
-
   const addEvent = (eventData: Omit<Event, 'id' | 'createdAt'>) => {
     const newEvent: Event = {
       ...eventData,
@@ -61,7 +60,6 @@ const Events = () => {
       description: "Your budget has been created successfully!"
     });
   };
-
   const deleteEvent = (eventId: string) => {
     setEvents(prev => prev.filter(event => event.id !== eventId));
     toast({
@@ -69,7 +67,6 @@ const Events = () => {
       description: "Budget has been removed successfully."
     });
   };
-
   const showConfetti = () => {
     const confetti = document.createElement('div');
     confetti.innerHTML = '🎊'.repeat(30);
@@ -87,7 +84,6 @@ const Events = () => {
     document.body.appendChild(confetti);
     setTimeout(() => document.body.removeChild(confetti), 4000);
   };
-
   const handleDownload = (event: Event) => {
     const user = localStorage.getItem('user');
     if (!user) {
@@ -96,11 +92,9 @@ const Events = () => {
       setShowLoginPrompt(true);
       return;
     }
-
     downloadPDF(event);
     showConfetti();
   };
-
   const generateBeautifulPDF = (event: Event) => {
     const doc = new jsPDF();
     const currencySymbol = getCurrencySymbol(event.currency);
@@ -160,24 +154,19 @@ const Events = () => {
     doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
     doc.setLineWidth(0.5);
     doc.roundedRect(margin, yPosition, pageWidth - 2 * margin, 55, 5, 5, 'S');
-    
     doc.setTextColor(textColor[0], textColor[1], textColor[2]);
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
-    
     const leftColumn = margin + 15;
     const rightColumn = pageWidth / 2 + 15;
-
     doc.text('Type:', leftColumn, yPosition + 18);
     doc.text('Status:', leftColumn, yPosition + 30);
     doc.text('Days:', leftColumn, yPosition + 42);
     doc.text('Currency:', rightColumn, yPosition + 18);
     doc.text('Created:', rightColumn, yPosition + 30);
     doc.text('Items:', rightColumn, yPosition + 42);
-    
     doc.setFont('helvetica', 'normal');
     doc.text(event.type, leftColumn + 30, yPosition + 18);
-    
     if (event.status === 'Completed') {
       doc.setTextColor(successColor[0], successColor[1], successColor[2]);
     } else {
@@ -223,13 +212,11 @@ const Events = () => {
       if (yPosition > pageHeight - 70) {
         doc.addPage();
         yPosition = margin;
-        
         doc.setTextColor(textColor[0], textColor[1], textColor[2]);
         doc.setFontSize(16);
         doc.setFont('helvetica', 'bold');
         doc.text('Budget Items (continued)', margin, yPosition);
         yPosition += 20;
-        
         doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
         doc.roundedRect(margin, yPosition, pageWidth - 2 * margin, 18, 3, 3, 'F');
         doc.setTextColor(255, 255, 255);
@@ -240,30 +227,23 @@ const Events = () => {
         doc.text(columnTitle, pageWidth - margin - 45, yPosition + 12);
         yPosition += 18;
       }
-      
       const rowHeight = item.notes && item.notes.trim() ? 25 : 20;
-
       if (index % 2 === 0) {
         doc.setFillColor(248, 250, 252);
         doc.rect(margin, yPosition, pageWidth - 2 * margin, rowHeight, 'F');
       }
-
       doc.setDrawColor(229, 231, 235);
       doc.setLineWidth(0.2);
       doc.line(margin, yPosition + rowHeight, pageWidth - margin, yPosition + rowHeight);
-      
       doc.setTextColor(textColor[0], textColor[1], textColor[2]);
       doc.setFontSize(11);
       doc.setFont('helvetica', 'normal');
-
       const itemName = item.name.length > 22 ? item.name.substring(0, 19) + '...' : item.name;
       const categoryName = item.category.length > 12 ? item.category.substring(0, 9) + '...' : item.category;
       doc.text(itemName, margin + 8, yPosition + 12);
       doc.text(categoryName, margin + 85, yPosition + 12);
-
       doc.setFont('helvetica', 'bold');
       doc.text(`${currencySymbol}${item.planned.toLocaleString()}`, pageWidth - margin - 45, yPosition + 12);
-
       if (item.notes && item.notes.trim()) {
         doc.setTextColor(107, 114, 128);
         doc.setFontSize(9);
@@ -281,7 +261,6 @@ const Events = () => {
     doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
     doc.setLineWidth(1);
     doc.roundedRect(margin, yPosition, pageWidth - 2 * margin, 35, 5, 5, 'S');
-    
     doc.setTextColor(textColor[0], textColor[1], textColor[2]);
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
@@ -302,17 +281,14 @@ const Events = () => {
     doc.setFont('helvetica', 'normal');
     doc.text('Generated by SmartBudget - Professional Budget Planning Solution', margin, footerY + 8);
     doc.text(`Page 1 of ${doc.internal.pages.length - 1}`, pageWidth - margin - 40, footerY + 8);
-
     return doc;
   };
-
   const downloadPDF = (event: Event) => {
     try {
       if (!event || !event.title || !event.items) {
         throw new Error('Invalid event data');
       }
       const doc = generateBeautifulPDF(event);
-
       const cleanTitle = event.title.replace(/[^a-z0-9\s]/gi, '').replace(/\s+/g, '_').toLowerCase();
       const timestamp = new Date().toISOString().slice(0, 10);
       const filename = `smartbudget_${cleanTitle}_${timestamp}.pdf`;
@@ -330,17 +306,14 @@ const Events = () => {
       });
     }
   };
-
   const user = localStorage.getItem('user');
   const planningEvents = events.filter(e => e.status === 'Planning');
   const completedEvents = events.filter(e => e.status === 'Completed');
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+  return <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       <nav className="bg-black/50 backdrop-blur-md border-b border-purple-500/20 px-4 py-3">
         <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-8">
-            <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Sasanka Budget Planner</h1>
+            <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Budget Planner</h1>
             <p className="text-gray-300 text-sm sm:text-base">Event & Trip Budget Planner</p>
           </div>
           
@@ -350,23 +323,17 @@ const Events = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-purple-500/30">
-                {currencies.slice(0, 10).map(currency => (
-                  <SelectItem key={currency.code} value={currency.code} className="text-white hover:bg-purple-600/20">
+                {currencies.slice(0, 10).map(currency => <SelectItem key={currency.code} value={currency.code} className="text-white hover:bg-purple-600/20">
                     {currency.code} ({currency.symbol})
-                  </SelectItem>
-                ))}
+                  </SelectItem>)}
               </SelectContent>
             </Select>
-            {user ? (
-              <Button variant="outline" onClick={() => window.location.href = '/dashboard'} className="border-purple-500/30 text-purple-300 hover:bg-purple-600/20">
+            {user ? <Button variant="outline" onClick={() => window.location.href = '/dashboard'} className="border-purple-500/30 text-purple-300 hover:bg-purple-600/20">
                 <User className="h-4 w-4 mr-2" />
                 Dashboard
-              </Button>
-            ) : (
-              <Button variant="outline" onClick={() => window.location.href = '/login'} className="border-purple-500/30 text-purple-300 hover:bg-purple-600/20">
+              </Button> : <Button variant="outline" onClick={() => window.location.href = '/login'} className="border-purple-500/30 text-purple-300 hover:bg-purple-600/20">
                 Sign In
-              </Button>
-            )}
+              </Button>}
           </div>
         </div>
       </nav>
@@ -385,8 +352,7 @@ const Events = () => {
         {/* Planning Events */}
         <div className="mb-6 sm:mb-8">
           <h3 className="text-lg sm:text-xl text-white mb-4 font-bold">Planning Events</h3>
-          {planningEvents.length === 0 ? (
-            <Card className="bg-slate-800/50 border-purple-500/20">
+          {planningEvents.length === 0 ? <Card className="bg-slate-800/50 border-purple-500/20">
               <CardContent className="p-8 sm:p-12 text-center">
                 <Calendar className="h-12 w-12 sm:h-16 sm:w-16 text-purple-400 mx-auto mb-4" />
                 <h4 className="text-lg sm:text-xl font-semibold text-white mb-2">No Events Yet</h4>
@@ -397,39 +363,23 @@ const Events = () => {
                   Create Your First Budget
                 </RainbowButton>
               </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {planningEvents.map(event => (
-                <EventCard key={event.id} event={event} onDownload={handleDownload} onDelete={deleteEvent} />
-              ))}
-            </div>
-          )}
+            </Card> : <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {planningEvents.map(event => <EventCard key={event.id} event={event} onDownload={handleDownload} onDelete={deleteEvent} />)}
+            </div>}
         </div>
 
         {/* Completed Events */}
-        {completedEvents.length > 0 && (
-          <div>
+        {completedEvents.length > 0 && <div>
             <h3 className="text-lg sm:text-xl font-semibold text-white mb-4">Past Events</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {completedEvents.map(event => (
-                <EventCard key={event.id} event={event} onDownload={handleDownload} onDelete={deleteEvent} />
-              ))}
+              {completedEvents.map(event => <EventCard key={event.id} event={event} onDownload={handleDownload} onDelete={deleteEvent} />)}
             </div>
-          </div>
-        )}
+          </div>}
       </div>
 
-      {showEventForm && (
-        <EventForm
-          onAddEvent={addEvent}
-          onClose={() => setShowEventForm(false)}
-          defaultCurrency={selectedCurrency}
-        />
-      )}
+      {showEventForm && <EventForm onAddEvent={addEvent} onClose={() => setShowEventForm(false)} defaultCurrency={selectedCurrency} />}
 
-      {showLoginPrompt && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      {showLoginPrompt && <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <Card className="w-full max-w-md bg-slate-800 border-purple-500/30">
             <CardHeader>
               <CardTitle className="text-white">Sign In Required</CardTitle>
@@ -438,37 +388,29 @@ const Events = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-              <Button 
-                onClick={() => window.location.href = '/login'} 
-                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-              >
+              <Button onClick={() => window.location.href = '/login'} className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
                 Sign In
               </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => setShowLoginPrompt(false)} 
-                className="border-purple-500/30 text-purple-300 hover:bg-purple-600/20"
-              >
+              <Button variant="outline" onClick={() => setShowLoginPrompt(false)} className="border-purple-500/30 text-purple-300 hover:bg-purple-600/20">
                 Cancel
               </Button>
             </CardContent>
           </Card>
-        </div>
-      )}
-    </div>
-  );
+        </div>}
+    </div>;
 };
-
-const EventCard = ({ event, onDownload, onDelete }: {
+const EventCard = ({
+  event,
+  onDownload,
+  onDelete
+}: {
   event: Event;
   onDownload: (event: Event) => void;
   onDelete: (eventId: string) => void;
 }) => {
   const currencySymbol = getCurrencySymbol(event.currency);
   const columnTitle = event.status === 'Completed' ? 'Expense' : 'Planned';
-
-  return (
-    <Card className="hover:shadow-2xl transition-all duration-300 bg-slate-800/50 border-purple-500/20 hover:border-purple-400/40">
+  return <Card className="hover:shadow-2xl transition-all duration-300 bg-slate-800/50 border-purple-500/20 hover:border-purple-400/40">
       <CardHeader>
         <div className="flex justify-between items-start">
           <div className="flex-1 min-w-0">
@@ -481,10 +423,7 @@ const EventCard = ({ event, onDownload, onDelete }: {
             <Badge variant={event.type === 'Trip' ? 'default' : 'secondary'} className="bg-blue-600/20 text-blue-300 border-blue-500/30 text-xs">
               {event.type}
             </Badge>
-            <Badge 
-              variant={event.status === 'Planning' ? 'outline' : 'secondary'} 
-              className={event.status === 'Planning' ? 'border-purple-500/30 text-purple-300 text-xs' : 'bg-green-600/20 text-green-300 border-green-500/30 text-xs'}
-            >
+            <Badge variant={event.status === 'Planning' ? 'outline' : 'secondary'} className={event.status === 'Planning' ? 'border-purple-500/30 text-purple-300 text-xs' : 'bg-green-600/20 text-green-300 border-green-500/30 text-xs'}>
               {event.status}
             </Badge>
           </div>
@@ -506,26 +445,16 @@ const EventCard = ({ event, onDownload, onDelete }: {
           </div>
         </div>
         <div className="mt-4 pt-4 border-t border-purple-500/20 space-y-2">
-          <Button 
-            variant="outline" 
-            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white border-green-500/30 text-sm" 
-            onClick={() => onDownload(event)}
-          >
+          <Button variant="outline" className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white border-green-500/30 text-sm" onClick={() => onDownload(event)}>
             <Download className="h-4 w-4 mr-2" />
             Download Complete
           </Button>
-          <Button 
-            variant="outline" 
-            className="w-full border-red-500/30 text-red-300 hover:bg-red-600/20 text-sm" 
-            onClick={() => onDelete(event.id)}
-          >
+          <Button variant="outline" className="w-full border-red-500/30 text-red-300 hover:bg-red-600/20 text-sm" onClick={() => onDelete(event.id)}>
             <Trash2 className="h-4 w-4 mr-2" />
             Delete Budget
           </Button>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default Events;
