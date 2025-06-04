@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +15,7 @@ interface EventFormProps {
     totalPlanned: number;
     currency: string;
     status: 'Planning' | 'Completed';
+    days: number;
     items: Array<{
       name: string;
       category: string;
@@ -42,6 +44,7 @@ const EventForm = ({ onAddEvent, onClose, defaultCurrency }: EventFormProps) => 
     type: 'Event' as 'Trip' | 'Event',
     currency: defaultCurrency,
     status: 'Planning' as 'Planning' | 'Completed',
+    days: 1,
     items: [
       { name: '', category: '', planned: 0, notes: '' }
     ]
@@ -82,6 +85,7 @@ const EventForm = ({ onAddEvent, onClose, defaultCurrency }: EventFormProps) => 
       type: formData.type,
       currency: formData.currency,
       status: formData.status,
+      days: formData.days,
       totalPlanned,
       items: formData.items.filter(item => item.name && item.category)
     });
@@ -91,8 +95,8 @@ const EventForm = ({ onAddEvent, onClose, defaultCurrency }: EventFormProps) => 
   const columnTitle = formData.status === 'Completed' ? 'Expense' : 'Planned';
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-slate-800 border-purple-500/30">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+      <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-slate-800 border-purple-500/30 my-4">
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
@@ -106,7 +110,7 @@ const EventForm = ({ onAddEvent, onClose, defaultCurrency }: EventFormProps) => 
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="title" className="text-gray-300">Title</Label>
                 <Input
@@ -134,6 +138,18 @@ const EventForm = ({ onAddEvent, onClose, defaultCurrency }: EventFormProps) => 
                     <SelectItem value="Event" className="text-white hover:bg-purple-600/20">Event</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="days" className="text-gray-300">Number of Days</Label>
+                <Input
+                  id="days"
+                  type="number"
+                  min="1"
+                  max="365"
+                  value={formData.days}
+                  onChange={(e) => setFormData(prev => ({ ...prev, days: parseInt(e.target.value) || 1 }))}
+                  className="bg-slate-700/50 border-purple-500/30 text-white placeholder:text-gray-400"
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="currency" className="text-gray-300">Currency</Label>
@@ -250,7 +266,7 @@ const EventForm = ({ onAddEvent, onClose, defaultCurrency }: EventFormProps) => 
               </div>
             </div>
 
-            <div className="flex space-x-2 pt-4">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 pt-4">
               <Button type="submit" className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
                 Create Budget
               </Button>
