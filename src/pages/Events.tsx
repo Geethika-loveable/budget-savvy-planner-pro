@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -130,7 +130,9 @@ const Events = () => {
 
     const userCurrency = localStorage.getItem('userCurrency') || 'USD';
     setDefaultCurrency(userCurrency);
+    setSelectedCurrency(userCurrency);
   }, []);
+  
   // Save events to localStorage whenever events change
   useEffect(() => {
     localStorage.setItem('events', JSON.stringify(events));
@@ -151,12 +153,14 @@ const Events = () => {
     const updatedEvents = [...events, newEvent];
     saveEvents(updatedEvents);
     setShowForm(false);
+    setShowEventForm(false);
     
     toast({
       title: "Budget Created",
       description: "Your budget has been created successfully!"
     });
   };
+  
   const handleVoiceBudgetExtracted = (budget: {
     title?: string;
     type?: 'Trip' | 'Event';
@@ -332,7 +336,8 @@ const Events = () => {
       doc.text(`Average per Day: ${currencySymbol}${(event.totalPlanned / event.days).toLocaleString()}`, 20, currentY + 20);
       
       // Footer
-      const pageCount = doc.getNumberOfPages();
+      // Note: For jsPDF 2.x compatibility
+      const pageCount = doc.internal.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
         doc.setFillColor(79, 70, 229);
@@ -412,7 +417,8 @@ const Events = () => {
         {/* Planning Events */}
         <div className="mb-6 sm:mb-8">
           <h3 className="text-lg sm:text-xl text-white mb-4 font-bold">Planning Events</h3>
-          {planningEvents.length === 0 ? (            <Card className="bg-slate-800/50 border-purple-500/20">
+          {planningEvents.length === 0 ? (
+            <Card className="bg-slate-800/50 border-purple-500/20">
               <CardContent className="p-8 sm:p-12 text-center">
                 <Calendar className="h-12 w-12 sm:h-16 sm:w-16 text-purple-400 mx-auto mb-4" />
                 <h4 className="text-lg sm:text-xl font-semibold text-white mb-2">No Events Yet</h4>
@@ -422,7 +428,7 @@ const Events = () => {
                 
                 {/* Voice Input Section */}
                 <div className="mb-6">
-                  <div className="text-sm text-gray-300 mb-3">🎤 Create budget with voice:</div>
+                  <div className="text-sm text-gray-300 mb-3"> Create budget with voice:</div>
                   <BudgetVoiceInput onBudgetExtracted={handleVoiceBudgetExtracted} />
                 </div>
                 
@@ -548,20 +554,8 @@ const Events = () => {
               </div>
             </CardContent>
           </Card>
-        )}
-
-        {events.length === 0 && (
-          <Card className="bg-slate-800/50 border-purple-500/20 text-center">
-            <CardContent className="py-12">
-              <div className="text-gray-400 mb-4">
-                <Calendar className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                <p className="text-lg">No budgets created yet</p>
-                <p className="text-sm">Create your first budget to get started!</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+        </div>
+      )}
 
       {showForm && (
         <EventForm
