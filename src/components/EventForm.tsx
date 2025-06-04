@@ -78,7 +78,14 @@ const EventForm = ({ onAddEvent, onClose, defaultCurrency }: EventFormProps) => 
     
     if (!formData.title) return;
 
-    const totalPlanned = formData.items.reduce((sum, item) => sum + item.planned, 0);
+    const validItems = formData.items.filter(item => item.name && item.category);
+    
+    if (validItems.length === 0) {
+      alert('At least 1 item is required to save the budget');
+      return;
+    }
+
+    const totalPlanned = validItems.reduce((sum, item) => sum + item.planned, 0);
 
     onAddEvent({
       title: formData.title,
@@ -87,7 +94,7 @@ const EventForm = ({ onAddEvent, onClose, defaultCurrency }: EventFormProps) => 
       status: formData.status,
       days: formData.days,
       totalPlanned,
-      items: formData.items.filter(item => item.name && item.category)
+      items: validItems
     });
   };
 
