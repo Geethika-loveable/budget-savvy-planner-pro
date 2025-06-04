@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,9 +6,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RainbowButton } from '@/components/ui/rainbow-button';
 import EventForm from '@/components/EventForm';
 import { BudgetVoiceInput } from '@/components/BudgetVoiceInput';
-import { Calendar, MapPin, DollarSign, Download, Trash2, User } from 'lucide-react';
+import { Calendar, MapPin, DollarSign, Download, Trash2, User, LogIn } from 'lucide-react';
 import { currencies, getCurrencySymbol } from '@/utils/currencies';
 import { useToast } from '@/hooks/use-toast';
+import { Link } from 'react-router-dom';
 import jsPDF from 'jspdf';
 
 interface Event {
@@ -29,11 +29,97 @@ interface Event {
   createdAt: string;
 }
 
+const EventCard: React.FC<{
+  event: Event;
+  onDownload: (event: Event) => void;
+  onDelete: (id: string) => void;
+}> = ({ event, onDownload, onDelete }) => {
+  return (
+    <Card className="bg-slate-800/50 border-purple-500/20 hover:border-purple-400/40 transition-all duration-300">
+      <CardHeader className="pb-3">
+        <div className="flex justify-between items-start">
+          <div className="flex-1">
+            <CardTitle className="text-lg text-white mb-2">{event.title}</CardTitle>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="outline" className="border-blue-500/30 text-blue-300">
+                {event.type}
+              </Badge>
+              <Badge 
+                variant={event.status === 'Planning' ? 'outline' : 'secondary'}
+                className={event.status === 'Planning' 
+                  ? 'border-yellow-500/30 text-yellow-300' 
+                  : 'bg-green-600/20 text-green-300 border-green-500/30'
+                }
+              >
+                {event.status}
+              </Badge>
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onDelete(event.id)}
+            className="text-red-400 hover:text-red-300 hover:bg-red-600/20 ml-2"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="pt-0">
+        <div className="space-y-2 text-sm text-gray-300 mb-4">
+          <div className="flex justify-between">
+            <span>Duration:</span>
+            <span>{event.days} day{event.days > 1 ? 's' : ''}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Items:</span>
+            <span>{event.items.length}</span>
+          </div>
+          <div className="flex justify-between font-semibold">
+            <span>Total {event.status === 'Completed' ? 'Expenses' : 'Planned'}:</span>
+            <span className="text-green-400">
+              {getCurrencySymbol(event.currency)}{event.totalPlanned.toLocaleString()}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span>Created:</span>
+            <span>{event.createdAt}</span>
+          </div>
+        </div>
+        
+        <Button
+          onClick={() => onDownload(event)}
+          className="w-full bg-green-600 hover:bg-green-700 text-white"
+        >
+          <Download className="h-4 w-4 mr-2" />
+          Download
+        </Button>
+      </CardContent>
+    </Card>
+  );
+};
+
 const Events = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [showEventForm, setShowEventForm] = useState(false);
   const [defaultCurrency, setDefaultCurrency] = useState('USD');
+  const [selectedCurrency, setSelectedCurrency] = useState('USD');
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const { toast } = useToast();
+  
+  // Mock user authentication state
+  const isLoggedIn = false;
+  const user = { name: 'John Doe', email: 'john@example.com' };
+  
+  // Filter events by status
+  const planningEvents = events.filter(event => event.status === 'Planning');
+  const completedEvents = events.filter(event => event.status === 'Completed');
+  
+  // Handle download (alias for downloadPDF)
+  const handleDownload = (event: Event) => {
+    downloadPDF(event);
+  };
 
   // Load events from localStorage on component mount
   useEffect(() => {
@@ -45,11 +131,16 @@ const Events = () => {
     const userCurrency = localStorage.getItem('userCurrency') || 'USD';
     setDefaultCurrency(userCurrency);
   }, []);
-
   // Save events to localStorage whenever events change
   useEffect(() => {
     localStorage.setItem('events', JSON.stringify(events));
   }, [events]);
+  
+  // Function to save events to state and localStorage
+  const saveEvents = (updatedEvents: Event[]) => {
+    setEvents(updatedEvents);
+  };
+  
   const addEvent = (eventData: Omit<Event, 'id' | 'createdAt'>) => {
     const newEvent: Event = {
       ...eventData,
