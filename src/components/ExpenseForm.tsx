@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { X } from 'lucide-react';
+import { VoiceInput } from '@/components/VoiceInput';
 
 interface ExpenseFormProps {
   onAddExpense: (expense: {
@@ -52,19 +53,34 @@ const ExpenseForm = ({ onAddExpense, onClose }: ExpenseFormProps) => {
       date: formData.date
     });
   };
-
   const updateFormData = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleVoiceExpenseExtracted = (expense: {
+    amount?: number;
+    category?: string;
+    description?: string;
+    date?: string;
+  }) => {
+    // Auto-fill the form with extracted data
+    setFormData(prev => ({
+      ...prev,
+      amount: expense.amount ? expense.amount.toString() : prev.amount,
+      category: expense.category || prev.category,
+      description: expense.description || prev.description,
+      date: expense.date || prev.date
+    }));
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-lg">
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
               <CardTitle>Add New Expense</CardTitle>
-              <CardDescription>Record a new expense in your budget</CardDescription>
+              <CardDescription>Record a new expense in your budget or use voice input</CardDescription>
             </div>
             <Button variant="ghost" size="icon" onClick={onClose}>
               <X className="h-4 w-4" />
@@ -72,6 +88,12 @@ const ExpenseForm = ({ onAddExpense, onClose }: ExpenseFormProps) => {
           </div>
         </CardHeader>
         <CardContent>
+          {/* Voice Input Section */}
+          <div className="mb-6">
+            <Label className="text-sm font-medium mb-2 block">Voice Input</Label>
+            <VoiceInput onExpenseExtracted={handleVoiceExpenseExtracted} />
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="amount">Amount ($)</Label>
