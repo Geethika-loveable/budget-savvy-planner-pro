@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RainbowButton } from '@/components/ui/rainbow-button';
 import EventForm from '@/components/EventForm';
+import { BudgetVoiceInput } from '@/components/BudgetVoiceInput';
 import { Calendar, MapPin, DollarSign, Download, Trash2, User } from 'lucide-react';
 import { currencies, getCurrencySymbol } from '@/utils/currencies';
 import { useToast } from '@/hooks/use-toast';
@@ -47,7 +48,6 @@ const Events = () => {
   useEffect(() => {
     localStorage.setItem('events', JSON.stringify(events));
   }, [events]);
-
   const addEvent = (eventData: Omit<Event, 'id' | 'createdAt'>) => {
     const newEvent: Event = {
       ...eventData,
@@ -59,6 +59,38 @@ const Events = () => {
     toast({
       title: "Budget Created",
       description: "Your budget has been created successfully!"
+    });
+  };
+  const handleVoiceBudgetExtracted = (budget: {
+    title?: string;
+    type?: 'Trip' | 'Event';
+    items?: Array<{
+      name: string;
+      category: string;
+      planned: number;
+      notes?: string;
+    }>;
+  }) => {
+    // Create a new event/budget from voice input
+    const newEvent: Event = {
+      id: Date.now().toString(),
+      title: budget.title || 'Voice Budget',
+      type: budget.type || 'Event',
+      totalPlanned: budget.items?.reduce((sum, item) => sum + item.planned, 0) || 0,
+      currency: 'USD', // Default currency
+      status: 'Planning',
+      createdAt: new Date().toISOString(),
+      days: 1, // Default days
+      items: budget.items?.map(item => ({
+        ...item,
+        notes: item.notes || ''
+      })) || []
+    };
+
+    setEvents(prev => [...prev, newEvent]);
+    toast({
+      title: "Voice Budget Created",
+      description: `Budget "${newEvent.title}" created with ${budget.items?.length || 0} items`,
     });
   };
 
@@ -385,14 +417,27 @@ const Events = () => {
         {/* Planning Events */}
         <div className="mb-6 sm:mb-8">
           <h3 className="text-lg sm:text-xl text-white mb-4 font-bold">Planning Events</h3>
-          {planningEvents.length === 0 ? (
-            <Card className="bg-slate-800/50 border-purple-500/20">
+          {planningEvents.length === 0 ? (            <Card className="bg-slate-800/50 border-purple-500/20">
               <CardContent className="p-8 sm:p-12 text-center">
                 <Calendar className="h-12 w-12 sm:h-16 sm:w-16 text-purple-400 mx-auto mb-4" />
                 <h4 className="text-lg sm:text-xl font-semibold text-white mb-2">No Events Yet</h4>
                 <p className="text-gray-300 mb-4 sm:mb-6 text-sm sm:text-base">
                   Create your first event or trip budget to get started with planning!
                 </p>
+                
+                {/* Voice Input Section */}
+                <div className="mb-6">
+                  <div className="text-sm text-gray-300 mb-3">🎤 Create budget with voice:</div>
+                  <BudgetVoiceInput onBudgetExtracted={handleVoiceBudgetExtracted} />
+                </div>
+                
+                {/* Divider */}
+                <div className="flex items-center justify-center mb-6">
+                  <div className="flex-1 border-t border-gray-600"></div>
+                  <span className="px-3 text-gray-400 text-sm">or</span>
+                  <div className="flex-1 border-t border-gray-600"></div>
+                </div>
+                
                 <RainbowButton onClick={() => setShowEventForm(true)}>
                   Create Your First Budget
                 </RainbowButton>
