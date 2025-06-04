@@ -23,7 +23,7 @@ export const useVoiceRecognition = ({
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [confidence, setConfidence] = useState(0);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<any>(null);
 
   // Check if speech recognition is supported
   const isSupported = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;

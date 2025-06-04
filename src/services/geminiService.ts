@@ -20,11 +20,10 @@ class GeminiService {
   constructor() {
     // Initialize will be called when API key is set
   }
-
   initialize(apiKey: string) {
     try {
       this.genAI = new GoogleGenerativeAI(apiKey);
-      this.model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
+      this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
       return true;
     } catch (error) {
       console.error('Failed to initialize Gemini AI:', error);
