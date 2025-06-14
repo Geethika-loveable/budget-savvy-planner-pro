@@ -47,7 +47,7 @@ const Login = () => {
           title: "Login Successful",
           description: "Welcome back to SmartBudget!",
         });
-        navigate('/dashboard');
+        navigate('/');
       } else {
         toast({
           title: "Login Failed",
