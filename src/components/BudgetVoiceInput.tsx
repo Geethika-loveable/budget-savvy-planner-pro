@@ -1,5 +1,7 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Button as MovingBorderButton } from '@/components/ui/moving-border';
 import { Card, CardContent } from '@/components/ui/card';
 import { Mic, MicOff, Settings } from 'lucide-react';
 import { useVoiceRecognition } from '@/hooks/useVoiceRecognition';
@@ -123,27 +125,37 @@ export const BudgetVoiceInput: React.FC<BudgetVoiceInputProps> = ({ onBudgetExtr
 
   return (
     <div className="flex items-center space-x-2">
-      <Button
+      <MovingBorderButton
         onClick={isListening ? stopListening : startListening}
         disabled={isProcessing}
-        className={`${
+        borderRadius="1.75rem"
+        className="bg-slate-900/[0.8] border border-slate-800 backdrop-blur-xl text-white flex items-center justify-center w-full h-full text-sm antialiased"
+        containerClassName={`${
           isListening 
-            ? 'bg-red-500 hover:bg-red-600' 
-            : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700'
-        } text-white`}
+            ? 'bg-red-500/20' 
+            : 'bg-green-600/20'
+        } h-12 w-auto px-4`}
+        borderClassName={`h-20 w-20 opacity-[0.8] ${
+          isListening 
+            ? 'bg-[radial-gradient(var(--red-500)_40%,transparent_60%)]'
+            : 'bg-[radial-gradient(var(--green-500)_40%,transparent_60%)]'
+        }`}
+        duration={2000}
       >
-        {isListening ? (
-          <>
-            <MicOff className="h-4 w-4 mr-2" />
-            Stop Recording
-          </>
-        ) : (
-          <>
-            <Mic className="h-4 w-4 mr-2" />
-            {isProcessing ? 'Processing...' : 'Voice Budget'}
-          </>
-        )}
-      </Button>
+        <div className="flex items-center space-x-2">
+          {isListening ? (
+            <>
+              <MicOff className="h-4 w-4" />
+              <span>Stop Recording</span>
+            </>
+          ) : (
+            <>
+              <Mic className="h-4 w-4" />
+              <span>{isProcessing ? 'Processing...' : 'Voice Budget'}</span>
+            </>
+          )}
+        </div>
+      </MovingBorderButton>
       
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
         <DialogTrigger asChild>
